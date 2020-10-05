@@ -9,7 +9,7 @@
  **********************************************************************/
 
 import { Command, flags } from '@oclif/command'
-import { boolean, string } from '@oclif/parser/lib/flags'
+import { string } from '@oclif/parser/lib/flags'
 import { cli } from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as Listr from 'listr'
@@ -17,7 +17,7 @@ import * as notifier from 'node-notifier'
 import * as path from 'path'
 
 import { KubeHelper } from '../../api/kube'
-import { cheDeployment, cheNamespace, listrRenderer, skipKubeHealthzCheck } from '../../common-flags'
+import { assumeYes, cheDeployment, cheNamespace, listrRenderer, skipKubeHealthzCheck } from '../../common-flags'
 import { DEFAULT_CHE_OPERATOR_IMAGE, SUBSCRIPTION_NAME } from '../../constants'
 import { CheTasks } from '../../tasks/che'
 import { getPrintHighlightedMessagesTask } from '../../tasks/installers/common-tasks'
@@ -52,13 +52,14 @@ export default class Update extends Command {
       description: 'Container image of the operator. This parameter is used only when the installer is the operator',
       default: DEFAULT_CHE_OPERATOR_IMAGE
     }),
-    'skip-version-check': boolean({
-      description: 'Skip user confirmation on version check',
+    'skip-version-check': flags.boolean({
+      description: 'Skip minimal versions check.',
       default: false
     }),
     'deployment-name': cheDeployment,
     'listr-renderer': listrRenderer,
     'skip-kubernetes-health-check': skipKubeHealthzCheck,
+    yes: assumeYes,
     help: flags.help({ char: 'h' }),
   }
 
@@ -141,7 +142,7 @@ export default class Update extends Command {
         await platformCheckTasks.run(ctx)
         await preUpdateTasks.run(ctx)
 
-        if (!flags['skip-version-check'] && flags.installer === 'operator') {
+        if (!flags.yes && flags.installer === 'operator') {
           cli.info(`Existed Eclipse Che operator: ${ctx.deployedCheOperatorImage}:${ctx.deployedCheOperatorTag}.`)
           cli.info(`New Eclipse Che operator    : ${ctx.newCheOperatorImage}:${ctx.newCheOperatorTag}.`)
 

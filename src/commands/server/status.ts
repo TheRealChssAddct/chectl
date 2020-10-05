@@ -17,7 +17,7 @@ import { KubeHelper } from '../../api/kube'
 import { VersionHelper } from '../../api/version'
 import { cheNamespace } from '../../common-flags'
 import { CheTasks } from '../../tasks/che'
-export default class List extends Command {
+export default class Status extends Command {
   // Implementation-Version it is a property from Manifest.ml inside of che server pod which indicate Eclipse Che build version.
   static description = 'status Eclipse Che server'
 
@@ -27,7 +27,7 @@ export default class List extends Command {
   }
 
   async run() {
-    const { flags } = this.parse(List)
+    const { flags } = this.parse(Status)
     const kube = new KubeHelper(flags)
     const che = new CheHelper(flags)
     const cheTask = new CheTasks(flags)

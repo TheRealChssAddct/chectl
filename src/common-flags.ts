@@ -53,3 +53,10 @@ export const cheApiEndpoint = string({
   env: 'CHE_API_ENDPOINT',
   required: false,
 })
+
+export const assumeYes = boolean({
+  description: 'Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively',
+  char: 'y',
+  default: false,
+  required: false,
+})

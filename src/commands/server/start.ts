@@ -19,7 +19,7 @@ import * as os from 'os'
 import * as path from 'path'
 
 import { KubeHelper } from '../../api/kube'
-import { cheDeployment, cheNamespace, devWorkspaceControllerNamespace, listrRenderer, skipKubeHealthzCheck as skipK8sHealthCheck } from '../../common-flags'
+import { assumeYes, cheDeployment, cheNamespace, devWorkspaceControllerNamespace, listrRenderer, skipKubeHealthzCheck as skipK8sHealthCheck } from '../../common-flags'
 import { DEFAULT_CHE_IMAGE, DEFAULT_CHE_OPERATOR_IMAGE, DEFAULT_DEV_WORKSPACE_CONTROLLER_IMAGE, DOCS_LINK_INSTALL_RUNNING_CHE_LOCALLY } from '../../constants'
 import { CheTasks } from '../../tasks/che'
 import { DevWorkspaceTasks } from '../../tasks/component-installers/devfile-workspace-operator-installer'
@@ -199,7 +199,8 @@ export default class Start extends Command {
       default: DEFAULT_DEV_WORKSPACE_CONTROLLER_IMAGE,
       env: 'DEV_WORKSPACE_OPERATOR_IMAGE',
     }),
-    'dev-workspace-controller-namespace': devWorkspaceControllerNamespace
+    'dev-workspace-controller-namespace': devWorkspaceControllerNamespace,
+    yes: assumeYes,
   }
 
   async setPlaformDefaults(flags: any): Promise<void> {
@@ -408,6 +409,18 @@ export default class Start extends Command {
     }], listrOptions)
 
     try {
+      const cluster = KubeHelper.KUBE_CONFIG.getCurrentCluster()
+      if (!cluster) {
+        throw new Error('Failed to get current Kubernetes cluster. Check if the current context is set via kubectl/oc')
+      }
+
+      if (!flags.yes) {
+        const confirmed = await cli.confirm(`You're going to deploy Eclipse Che server in namespace '${flags.chenamespace}' on server '${cluster ? cluster.server : ''}'. If you want to continue - press Y`)
+        if (!confirmed) {
+          this.exit(0)
+        }
+      }
+
       await preInstallTasks.run(ctx)
 
       if (!ctx.isCheDeployed) {

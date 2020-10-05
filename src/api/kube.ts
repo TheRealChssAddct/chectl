@@ -348,7 +348,7 @@ export class KubeHelper {
     }
   }
 
-  async getPodListByLabel(namespace= '', labelSelector: string): Promise<V1Pod[]> {
+  async getPodListByLabel(namespace = '', labelSelector: string): Promise<V1Pod[]> {
     const k8sCoreApi = KubeHelper.KUBE_CONFIG.makeApiClient(CoreV1Api)
     try {
       const { body: podList } = await k8sCoreApi.listNamespacedPod(namespace, undefined, undefined, undefined, undefined, labelSelector)
@@ -620,6 +620,26 @@ export class KubeHelper {
       }
     } catch {
       return
+    }
+  }
+
+  async patchCustomResource(name: string, namespace: string, patch: any): Promise<any | undefined> {
+    const k8sCoreApi = KubeHelper.KUBE_CONFIG.makeApiClient(CustomObjectsApi)
+
+    // It is required to patch content-type, otherwise request will be rejected with 415 (Unsupported media type) error.
+    const requestOptions = {
+      headers: {
+        'content-type': 'application/merge-patch+json'
+      }
+    }
+
+    try {
+      const res = await k8sCoreApi.patchNamespacedCustomObject('org.eclipse.che', 'v1', namespace, 'checlusters', name, patch, undefined, undefined, undefined, requestOptions)
+      if (res && res.body) {
+        return res.body
+      }
+    } catch (e) {
+      throw this.wrapK8sClientError(e)
     }
   }
 
@@ -1427,7 +1447,7 @@ export class KubeHelper {
     }
   }
 
-  async getAmoutUsers(): Promise<number> {
+  async getAmountUsers(): Promise<number> {
     const customObjectsApi = KubeHelper.KUBE_CONFIG.makeApiClient(CustomObjectsApi)
     let amountOfUsers: number
     try {

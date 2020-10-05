@@ -92,7 +92,7 @@ export namespace CommonPlatformTasks {
             ctx.CROverrides = { spec: { auth: { openShiftoAuth: false } } }
           }
         } else {
-          if (await kube.getAmoutUsers() === 0) {
+          if (await kube.getAmountUsers() === 0) {
             ctx.highlightedMessages.push(`❗ ${ansi.yellow('[WARNING]')} OpenShift OAuth is turned off, because there are no any users added. See: "${DOCS_LINK_HOW_TO_CREATE_USER_OS3}"`)
             ctx.CROverrides = { spec: { auth: { openShiftoAuth: false } } }
           }

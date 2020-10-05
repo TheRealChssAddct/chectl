@@ -345,6 +345,11 @@ export class OperatorTasks {
     {
       title: `Delete the Custom Resource of type ${CHE_CLUSTER_CRD}`,
       task: async (_ctx: any, task: any) => {
+        const checluster = await kh.getCheCluster(flags.chenamespace)
+        if (checluster) {
+          await kh.patchCustomResource(checluster.metadata.name, flags.chenamespace, { metadata: { finalizers: null } })
+        }
+
         await kh.deleteCheCluster(flags.chenamespace)
         do {
           await cli.wait(2000) //wait a couple of secs for the finalizers to be executed

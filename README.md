@@ -258,6 +258,10 @@ OPTIONS
   -n, --chenamespace=chenamespace                                          [default: che] Kubernetes namespace where
                                                                            Eclipse Che server is supposed to be deployed
 
+  -y, --yes                                                                Automatic yes to prompts; assume "yes" as
+                                                                           answer to all prompts and run
+                                                                           non-interactively
+
   --delete-namespace                                                       Indicates that a Eclipse Che namespace will
                                                                            be deleted as well
 
@@ -269,8 +273,6 @@ OPTIONS
                                                                            engine is the DevWorkspace
 
   --listr-renderer=default|silent|verbose                                  [default: default] Listr renderer
-
-  --skip-deletion-check                                                    Skip user confirmation on deletion check
 
   --skip-kubernetes-health-check                                           Skip Kubernetes health check
 ```
@@ -357,6 +359,9 @@ OPTIONS
 
   -t, --templates=templates
       Path to the templates folder
+
+  -y, --yes
+      Automatic yes to prompts; assume "yes" as answer to all prompts and run non-interactively
 
   --auto-update
       Auto update approval strategy for installation Eclipse Che.
@@ -455,8 +460,8 @@ OPTIONS
       the latest known version.
                            This parameter is used only when the installer is 'olm'.
 
-  --workspace-engine=legacy|dev-workspace
-      [default: legacy] Workspace Engine. If not set, default is "legacy". "dev-workspace" is experimental.
+  --workspace-engine=che-server|dev-workspace
+      [default: che-server] Workspace Engine. If not set, default is "che-server". "dev-workspace" is experimental.
 
   --workspace-pvc-storage-class-name=workspace-pvc-storage-class-name
       persistent volume(s) storage class name to use to store Eclipse Che workspaces data
@@ -549,6 +554,10 @@ OPTIONS
   -t, --templates=templates                                                    [default: templates] Path to the
                                                                                templates folder
 
+  -y, --yes                                                                    Automatic yes to prompts; assume "yes" as
+                                                                               answer to all prompts and run
+                                                                               non-interactively
+
   --che-operator-image=che-operator-image                                      [default:
                                                                                quay.io/eclipse/che-operator:nightly]
                                                                                Container image of the operator. This
@@ -562,7 +571,7 @@ OPTIONS
 
   --skip-kubernetes-health-check                                               Skip Kubernetes health check
 
-  --skip-version-check                                                         Skip user confirmation on version check
+  --skip-version-check                                                         Skip minimal versions check.
 ```
 
 _See code: [src/commands/server/update.ts](https://github.com/che-incubator/chectl/blob/v0.0.2/src/commands/server/update.ts)_

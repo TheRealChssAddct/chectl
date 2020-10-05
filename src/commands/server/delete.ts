@@ -14,7 +14,7 @@ import { cli } from 'cli-ux'
 import * as Listrq from 'listr'
 
 import { KubeHelper } from '../../api/kube'
-import { cheDeployment, cheNamespace, devWorkspaceControllerNamespace, listrRenderer, skipKubeHealthzCheck } from '../../common-flags'
+import { assumeYes, cheDeployment, cheNamespace, devWorkspaceControllerNamespace, listrRenderer, skipKubeHealthzCheck } from '../../common-flags'
 import { CheTasks } from '../../tasks/che'
 import { DevWorkspaceTasks } from '../../tasks/component-installers/devfile-workspace-operator-installer'
 import { HelmTasks } from '../../tasks/installers/helm'
@@ -36,11 +36,8 @@ export default class Delete extends Command {
     }),
     'deployment-name': cheDeployment,
     'listr-renderer': listrRenderer,
-    'skip-deletion-check': boolean({
-      description: 'Skip user confirmation on deletion check',
-      default: false
-    }),
-    'skip-kubernetes-health-check': skipKubeHealthzCheck
+    'skip-kubernetes-health-check': skipKubeHealthzCheck,
+    yes: assumeYes
   }
 
   async run() {
@@ -72,25 +69,28 @@ export default class Delete extends Command {
       tasks.add(cheTasks.deleteNamespace(flags))
     }
 
-    const cluster = KubeHelper.KUBE_CONFIG.getCurrentCluster()
-    if (!cluster) {
-      throw new Error('Failed to get current Kubernetes cluster. Check if the current context is set via kubect/oc')
+    if (await this.isDeleteConfirmed(flags)) {
+      await tasks.run()
+    } else {
+      this.exit(0)
     }
-
-    if (!flags['skip-deletion-check']) {
-      const confirmed = await cli.confirm(`You're going to remove Eclipse Che server in namespace '${flags.chenamespace}' on server '${cluster ? cluster.server : ''}'. If you want to continue - press Y`)
-      if (!confirmed) {
-        this.exit(0)
-      }
-    }
-
-    await tasks.run()
 
     notifier.notify({
       title: 'chectl',
       message: 'Command server:delete has completed.'
     })
+  }
 
-    this.exit(0)
+  async isDeleteConfirmed(flags: any): Promise<boolean> {
+    const cluster = KubeHelper.KUBE_CONFIG.getCurrentCluster()
+    if (!cluster) {
+      throw new Error('Failed to get current Kubernetes cluster. Check if the current context is set via kubectl/oc')
+    }
+
+    if (!flags.yes) {
+      return cli.confirm(`You're going to remove Eclipse Che server in namespace '${flags.chenamespace}' on server '${cluster ? cluster.server : ''}'. If you want to continue - press Y`)
+    }
+
+    return true
   }
 }
